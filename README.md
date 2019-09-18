@@ -11,7 +11,7 @@ npm i -S requirets
 ## Usage
 
 ```js
-const requireTS = require('requirets')(__dirname);
+const requireTS = require('require-ts2')(__dirname);
 
 const data = requireTS('./data.ts');
 ```
