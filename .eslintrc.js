@@ -26,6 +26,7 @@ module.exports = {
         'object-curly-newline': 0,
         'consistent-return': 0,
         'no-unused-vars': 0,
+        'global-require': 0,
         '@typescript-eslint/no-unused-vars': 2,
         'no-param-reassign': 0,
         'no-return-await': 0,
