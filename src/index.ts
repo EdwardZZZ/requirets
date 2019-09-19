@@ -6,33 +6,38 @@ import * as process from 'process';
 
 const TSMap: Map<string, any> = new Map();
 
-module.exports = (dirName: string = process.cwd()) => function requireTS(id: string, ENCODE: string = 'utf8') {
-    const fileName = path.join(dirName, id);
+module.exports = (fileName: string = process.cwd()) => function requireTS(id: string, ENCODE: string = 'utf8') {
+    const filename = path.join(path.dirname(fileName), id);
 
-    if (id.slice(-3) !== '.ts') return require(fileName);
+    if (id.slice(-3) !== '.ts') return require(filename);
+    if (TSMap.has(filename)) return TSMap.get(filename);
 
-    const txt = fs.readFileSync(fileName, ENCODE);
+    const TSModule = Reflect.construct(module.constructor, [filename, null]);
+    TSModule.filename = fileName;
+    const ParentModule = Reflect.construct(module.constructor, [fileName, null]);
+    ParentModule.filename = module.filename;
+    TSModule.parent = ParentModule;
 
-    if (TSMap.has(fileName)) return TSMap.get(fileName);
-
-    const TSModule = { id: fileName, exports: {} };
     const { exports } = TSModule;
-    const dirname = path.dirname(fileName);
+    const dirname = path.dirname(filename);
+    const txt = fs.readFileSync(filename, ENCODE);
     const code = ts.transpileModule(txt, {
-        fileName,
+        fileName: filename,
         // transformers: ts.CustomTransformers,
         compilerOptions: {},
         reportDiagnostics: true,
     });
 
     const inspectorWrapper = vm.runInThisContext(`(function (exports, require, module, __filename, __dirname) { ${code.outputText} });`, {
-        filename: fileName,
+        filename,
         timeout: 5e3,
     });
 
-    inspectorWrapper.call(global, exports, requireTS, TSModule, fileName, dirname);
+    inspectorWrapper.call(global, exports, requireTS, TSModule, filename, dirname);
 
-    TSMap.set(fileName, TSModule.exports);
+    const result = TSModule.exports;
 
-    return TSModule.exports;
+    TSMap.set(fileName, result);
+
+    return result;
 };
