@@ -37,7 +37,7 @@ module.exports = (fileName: string = process.cwd()) => function requireTS(id: st
 
     const result = TSModule.exports;
 
-    TSMap.set(fileName, result);
+    TSMap.set(filename, result);
 
     return result;
 };

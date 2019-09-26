@@ -5,7 +5,7 @@
 ## Installation
 
 ```sh
-npm i -S requirets
+npm i -S require-ts2
 ```
 
 ## Usage
